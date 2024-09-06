@@ -1,32 +1,41 @@
-import { getAuth, sendSignInLinkToEmail } from "firebase/auth";
+import { getAuth, sendSignInLinkToEmail, signInWithPopup } from "firebase/auth";
 import { useState } from "react";
+import { auth } from "../App";
+import { GoogleAuthProvider } from "firebase/auth";
+
+const provider = new GoogleAuthProvider();
 
 export const Signin = () => {
     const [email,setEmail] = useState("")
     const actionCodeSettings = {
         // URL you want to redirect back to. The domain (www.example.com) for this
         // URL must be in the authorized domains list in the Firebase Console.
-        url: 'https://localhost:3000',
+        url: 'http://localhost:5173',
         // This must be true.
         handleCodeInApp: true,
       };
 
   async function onSignin() {
-    const auth = getAuth();
-    await sendSignInLinkToEmail(auth, email, actionCodeSettings)
-      .then(() => {
-        window.localStorage.setItem("emailForSignIn", email);
-        alert("sent email")
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        alert("email not sent")
-        console.log(errorCode, errorMessage)
-      });
+    
+    await signInWithPopup(auth, provider)
+    .then((result) => {
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if(!credential) return;
+      const token = credential.accessToken;
+      const user = result.user;
+      alert("signed in successfully")
+    }).catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      const email = error.customData.email;
+      const credential = GoogleAuthProvider.credentialFromError(error);
+      console.log(errorCode, errorMessage)
+      alert("not signed in")
+      // ...
+    });
+  
   }
   return <>
-    <input onChange={(e)=>setEmail(e.target.value)} type="text" />
-    <button onClick={onSignin}>SignIn</button>
+    <button onClick={onSignin}>Login with Google</button>
   </>;
 };

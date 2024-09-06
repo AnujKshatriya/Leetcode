@@ -1,6 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { Signin } from "./component/Signin";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useEffect } from "react";
 
 const firebaseConfig = {
   apiKey: "AIzaSyANwrq0IJQTzP00jQmUGRmBE7nRkq73no8",
@@ -13,10 +15,21 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+
 
 function App() {
+  useEffect(()=>{
+    onAuthStateChanged(auth,(user)=>{
+      if(user){
 
+      }
+      else{
+
+      }
+    })
+  },[])
   return (
     <>
       <h1 className="text-2xl text-red-400">
