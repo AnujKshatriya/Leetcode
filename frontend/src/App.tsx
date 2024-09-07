@@ -1,8 +1,10 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { Signin } from "./component/Signin";
+import {Signin, Topbar} from "./component/index"
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
+import { RecoilRoot, useRecoilState } from "recoil";
+import { userAtom } from "./store/atoms/user";
 
 const firebaseConfig = {
   apiKey: "AIzaSyANwrq0IJQTzP00jQmUGRmBE7nRkq73no8",
@@ -18,26 +20,45 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-
-function App() {
+function StoreApp() {
+  const [user,setUser] = useRecoilState(userAtom)
   useEffect(()=>{
     onAuthStateChanged(auth,(user)=>{
-      if(user){
-
+      if(user && user.email){
+        setUser({
+          loading:false,
+          user:{
+            email: user.email
+          }
+        })
       }
       else{
-
+        setUser({
+          loading:false,
+        })
       }
     })
   },[])
+
+  if(user.loading){
+    return <div>Loading....</div>
+  }
+
+  if(!user.user){
+    return <div><Signin/></div>
+  }
+
   return (
-    <>
-      <h1 className="text-2xl text-red-400">
-        Hllo World
-      </h1>
-      <Signin/>
-    </>
+    <div className="w-full flex items-center justify-center">
+      <Topbar/>
+    </div>
   )
+} 
+
+function App() {
+  return <RecoilRoot>
+    <StoreApp/>
+  </RecoilRoot>
 }
 
 export default App
